@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import Dropdown from 'react-dropdown';
 
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
@@ -10,6 +11,7 @@ import { useMIDI, useMIDINote } from '@react-midi/hooks';
 
 import { Piano, KeyboardShortcuts, MidiNumbers } from 'react-piano';
 import 'react-piano/dist/styles.css';
+import 'react-dropdown/style.css';
 
 export const Home = ({ room, uid, created, backButton }) => {
     const firestore = firebase.firestore();
@@ -19,6 +21,7 @@ export const Home = ({ room, uid, created, backButton }) => {
 
     const [activeNotes, setActiveNotes] = useState([]);
     const [realRoom, setRealRoom] = useState('loading');
+    const [selectedDevice, setDevice] = useState();
 
     const [messages] = useCollectionData(query, { idField: 'id' });
 
@@ -112,6 +115,11 @@ export const Home = ({ room, uid, created, backButton }) => {
         return (<></>);
     };
 
+    const updateDevice = (e) => {
+        const result = inputs.filter(x => x.name === e.value);
+        setDevice(result[0]);
+    }
+
     return (
         <>
             {realRoom === 'real' ? <>
@@ -144,9 +152,11 @@ export const Home = ({ room, uid, created, backButton }) => {
                         // activeNotes={messages && messages.map(x => x.note)}
                         width={1300}
                     />
-                    <MIDINoteLog input={inputs[0]} keyPressDown={keyPressDown} keyPressUp={keyPressUp} />
+                    <MIDINoteLog input={selectedDevice} keyPressDown={keyPressDown} keyPressUp={keyPressUp} />
                 </div>
                 <p>
+                    <b>Device:</b> <span style={{ width:"250px", display: 'inline-block', verticalAlign: 'middle' }}><Dropdown options={inputs.map(x => x.name)} onChange={updateDevice}/></span>
+                    <br/><br/>
                     <b>Room:</b> {room}
                     <button type="button" className='optionButton' onClick={() => backButton()}>Back</button>
                 </p>
